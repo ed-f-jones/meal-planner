@@ -1,21 +1,47 @@
 const search = document.getElementById('search');
 const submit = document.getElementById('submit');
 const random = document.getElementById('random');
-const meals = document.getElementById('meals');
+const mealsEl = document.getElementById('meals');
 const resultHeading = document.getElementById('result-heading');
 const single_mealEl = document.getElementById('single-meal');
 
 
-// search meal and fetch from api
+// Search meals and fetch api
 function searchMeal(e){
     e.preventDefault();
 
-    // clear single meal
-    single_mealEl.innerHTML ='';
+// clear single meal
+single_mealEl.innerHTML ='';
 
-    // get the earch term
-    const term = search.nodeValue;
+// get search term
+const term = search.value;
+
+// check for empty
+    if (term.trim()) {
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${term}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            resultHeading.innerHTML = `<h2> Search results for '${term}':</h2>`;
+
+            if(data.meals === null){
+                resultHeading.innerHTML = `<h2> No search results for '${term}' try again</h2>`
+            } else {
+                mealsEl.innerHTML = data.meals.map(meal => `
+                <div class="meal">
+                    <img src="${meal.strMealThumb}" alt="${meal.strMeal}" />
+                    <div class="meal-info" data-mealID="${meal.idMeal}">
+                    <h3>${meal.strMeal}</h3>
+                    </div>
+                </div>`).join('');
+            }
+        });
+        // clear search text
+        search.value = '';
+    } else {
+    alert('Please enter a search value');
+    }
 }
 
-// event listeners
-submit.addEventListener('submit', searchMeal);
+// Event listeners
+submit.addEventListener('submit',searchMeal);
